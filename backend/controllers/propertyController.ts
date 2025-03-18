@@ -1,72 +1,83 @@
-import {Request , Response} from "express";
+import { Request, Response } from "express";
 import Property from "../models/Property";
 
-export const createProperty = async(req:Request,res:Response)=>
-{   try
-    {const newProperty =new Property(req.body);
+interface MulterRequest extends Request {
+  file?: Express.Multer.File;
+}
+
+export const createProperty = async (req: MulterRequest, res: Response) => {
+  try {
+    const{
+        title,
+        bhk,
+        cost,
+        priceRange,
+        location,
+    }=req.body;
+    const imageUrl=req.file?.path;
+    const newProperty = new Property(
+        {
+            title,
+            bhk,
+            cost,
+            priceRange,
+            location,
+            imageUrl
+        }
+    );
     await newProperty.save();
-    res.status(201).json(newProperty);}
-    catch(error)
-    {
-        res.status(500).json({error: "Failed to create property"});
-    }
-}
+    res.status(201).json(newProperty);
+  }
+   catch (error) {
+    res.status(500).json({ error: "Failed to create property" });
+  }
+};
 
-export const getAllProperties = async(req:Request,res:Response)=>
-{
-    try{
-        const properties = await Property.find();
-        res.json(properties);
-    }
-    catch(error)
-    {
-        res.status(500).json({error:"Failed to fetch properties"});   
-    }
-}
+export const getAllProperties = async (req: Request, res: Response) => {
+  try {
+    const properties = await Property.find();
+    res.json(properties);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch properties" });
+  }
+};
 
-export const getPropertyById = async(req:Request,res:Response)=>
-{
-    try{
-        const property = await Property.findById(req.params.id);
-        if(!property)
-        {
-            res.status(404).json({error:"Property not found"});
-        }
-        res.json(property);
+export const getPropertyById = async (req: Request, res: Response) => {
+  try {
+    const property = await Property.findById(req.params.id);
+    if (!property) {
+      res.status(404).json({ error: "Property not found" });
     }
-    catch(error)
-    {
-        res.status(500).json({error:"Failed to fetch property"});
-    }
-}
+    res.json(property);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch property" });
+  }
+};
 
-export const updateProperty = async (req:Request, res:Response)=>
-{
-    try{
-        const updateProperty = await Property.findByIdAndUpdate(req.params.id,req.body,{new : true});
-        if(!updateProperty)
-        {
-            res.status(404).json({error:"Property not Found"})
-        }
-        res.json(updateProperty);
+export const updateProperty = async (req: Request, res: Response) => {
+  try {
+    const updateProperty = await Property.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    );
+    if (!updateProperty) {
+      res.status(404).json({ error: "Property not Found" });
     }
-    catch(error)
-    {
-        res.status(500).json({error:"failed to update property"});
-    }
-}
+    res.json(updateProperty);
+  } catch (error) {
+    res.status(500).json({ error: "failed to update property" });
+  }
+};
 
-export const deleteProperty=async (req:Request,res:Response)=>
-{
-    try{
-        const deleteProperty = await Property.findByIdAndDelete(req.params.id);
-        if(!deleteProperty)
-        {
-            res.status(404).json({error:"Property not found"});
-        }
-        res.json({message:"Property deleted successfully"});
+export const deleteProperty = async (req: Request, res: Response) => {
+  try {
+    const deleteProperty = await Property.findByIdAndDelete(req.params.id);
+    if (!deleteProperty) {
+      res.status(404).json({ error: "Property not found" });
     }
-    catch(error){
-        res.status(500).json({error:"Failed to delete property"});
-    }
-}
+    res.json({ message: "Property deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to delete property" });
+  }
+};
