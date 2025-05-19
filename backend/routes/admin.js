@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { adminModel } from "../db.js";
 import { adminVerification } from "../zod/adminVerification.js";
+import  adminMiddleware  from "../middlewares/admin.js";
 
 const adminRouter = express.Router();
 
@@ -42,9 +43,46 @@ adminRouter.post("/signup", async (req, res) => {
     }
 });
 
-adminRouter.post("/signin", async (req, res) => {})
+adminRouter.post("/signin", async (req, res) => {
+    const {email,password}=req.body;
+    try{
+        const admin= await adminModel.findOne(
+            {
+                email
+            }
+        )
+        if(!admin)
+        {
+            return res.status(404).json(
+                {
+                    message:"Admin not found"
+                }
+            )
+        }
+        const verifiedPassword= await bcrypt.compare(password,admin.password);
+        if(!verifiedPassword)
+        {
+            res.status(401).json({
+                message:"Invalid password"
+            })
+        }
+        const token = jwt.sign({id:admin._id},process.env.JWT_ADMIN_SECRET);
+        res.status(200).json({
+            token,
+        })
+    }
+    catch(error)
+    {
+        res.status(500).json(
+            {
+                message:"error in signing in",
+                error:error.message,
+            }
+        )
+    }
+})
 
-adminRouter.post("/addProperty", async (req, res) => {})
+adminRouter.post("/addProperty",adminMiddleware, async (req, res) => {res.send(req.adminId)})
 
 adminRouter.post("/getProperties", async (req, res) => {})
 
