@@ -2,9 +2,10 @@ import router from "express";
 import express from "express";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
-import { adminModel } from "../db.js";
+import { adminModel, propertyModel } from "../db.js";
 import { adminVerification } from "../zod/adminVerification.js";
 import  adminMiddleware  from "../middlewares/admin.js";
+import { propertyVerification } from "../zod/propertyVerification.js";
 
 const adminRouter = express.Router();
 
@@ -82,18 +83,62 @@ adminRouter.post("/signin", async (req, res) => {
     }
 })
 
-adminRouter.post("/addProperty",adminMiddleware, async (req, res) => {res.send(req.adminId)})
+adminRouter.post("/addProperty",adminMiddleware, async (req, res) => {
+    const verifiedProperty=await propertyVerification.safeParse(req.body);
+    if(!verifiedProperty.success) {
+        return res.status(400).json({
+            message: "Invalid data",
+        });
+    }
+    try{
+        const {name, description, price, imageUrls, location} = req.body;
+        const data={...verifiedProperty.data, adminId:req.adminId};
+        propertyModel.create(data);
+        res.status(200).json({
+            message:"property Added successfully",
+        })
+    }
+    catch(err)
+    {
+        res.status(500).json({
+            message:"Error in adding property",
+            error:err.message,
+        })
+    }
+})
 
-adminRouter.post("/getProperties", async (req, res) => {})
+adminRouter.post("/getProperties", adminMiddleware,async (req, res) => {
+    try
+   { const adminProperties = await propertyModel.find({ adminId: req.adminId });
+    if(!adminProperties)
+    {
+        res.status(400).json({
+            message:"Invalid request"
+        })
+    }
+    res.status(200).json({
+        message:"Properties fetched successfully",
+        properties:adminProperties,
+    })
+}
+catch(error)
+{
+    res.status(500).json({
+        message:"Error in fetching properties",
+        error:error.message,
+    })
+}
+    
+})
 
-adminRouter.post("/getProperty", async (req, res) => {})
+adminRouter.post("/getProperty",adminMiddleware, async (req, res) => {})
 
-adminRouter.post("/deleteProperty", async (req, res) => {})
+adminRouter.post("/deleteProperty", adminMiddleware,async (req, res) => {})
 
-adminRouter.post("/updateProperty", async (req, res) => {})
+adminRouter.post("/updateProperty",adminMiddleware, async (req, res) => {})
 
-adminRouter.post("/getAdmin", async (req, res) => {})
+adminRouter.post("/getAdmin", adminMiddleware, async (req, res) => {})
 
-adminRouter.post("/updateAdmin", async (req, res) => {})
+adminRouter.post("/updateAdmin",adminMiddleware, async (req, res) => {})
 
 export default adminRouter;

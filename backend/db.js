@@ -82,6 +82,11 @@ const propertySchema = new Schema({
         type:String,
         required:true
     },
+    adminId:{
+        type:Types.ObjectId,
+        ref:"admins",
+        required:true
+    },
 })
 
 export const userModel = mongoose.model("users",userSchema);
