@@ -87,6 +87,7 @@ const propertySchema = new Schema({
         ref:"admins",
         required:true
     },
+    //available:
 })
 
 export const userModel = mongoose.model("users",userSchema);
