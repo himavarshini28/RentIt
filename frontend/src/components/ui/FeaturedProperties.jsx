@@ -44,7 +44,7 @@ const FeaturedProperties = () => {
         <div className="mt-12 grid gap-5 max-w-lg mx-auto lg:grid-cols-4 lg:max-w-none md:grid-cols-2">
           {properties.length > 0 ? (
             properties.map((property) => (
-              <PropertyCard key={property._id || property.id} property={property} />
+              <PropertyCard key={property._id} property={property} />
             ))
           ) : (
             <p className="text-center col-span-full text-gray-500">No properties found.</p>
@@ -52,12 +52,12 @@ const FeaturedProperties = () => {
         </div>
 
         <div className="mt-10 text-center">
-          <a
-            href="/property"
+          <Link
+            to="/property"
             className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-cyan-600 hover:bg-cyan-700"
           >
             View All Properties
-          </a>
+          </Link>
         </div>
       </div>
     </section>
