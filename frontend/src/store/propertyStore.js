@@ -32,7 +32,7 @@ const usePropertyStore = create((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       // API call to get properties
-      const response = await fetch('http://localhost:3000/api/property/v1/get-properties', {
+      const response = await fetch('https://rent-it-zv5s.vercel.app/api/property/v1/get-properties', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -62,7 +62,7 @@ const usePropertyStore = create((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       // API call to get property by ID
-      const response = await fetch(`http://localhost:3000/api/property/${id}`, {
+      const response = await fetch(`https://rent-it-zv5s.vercel.app/api/property/v1/${id}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
