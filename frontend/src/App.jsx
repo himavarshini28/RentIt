@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from 'react-router-dom'
+import { Route, Routes, Navigate, useLocation } from 'react-router-dom'
 import HomePage from './pages/HomePage'
 import PropertyDetailPage from './pages/PropertyDetailPage'
 import LoginPage from './pages/LoginPage'
