@@ -8,7 +8,7 @@ const Allproperties = () => {
   useEffect(() => {
     const fetchProperties = async () => {
       try {
-        const response = await fetch('http://localhost:3000/api/property/v1/get-properties');
+        const response = await fetch('https://rent-it-zv5s.vercel.app/api/property/v1/get-properties');
         const data = await response.json();
         setProperties(data);
       } catch (error) {
