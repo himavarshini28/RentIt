@@ -1,0 +1,385 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import useUserStore from '../store/userStore';
+import usePropertyStore from '../store/propertyStore';
+
+const UserDashboardPage = () => {
+  const navigate = useNavigate();
+  const { user, isAuthenticated, logout } = useUserStore();
+  const { properties, fetchProperties, isLoading } = usePropertyStore();
+  const [activeTab, setActiveTab] = useState('profile');
+  
+  useEffect(() => {
+    // Check authentication status
+    if (!isAuthenticated) {
+      navigate('/login');
+    }
+    
+    // Fetch user's properties
+    fetchProperties();
+  }, [isAuthenticated, navigate, fetchProperties]);
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'profile':
+        return (
+          <div className="bg-white shadow overflow-hidden sm:rounded-lg">
+            <div className="px-4 py-5 sm:px-6">
+              <h3 className="text-lg leading-6 font-medium text-gray-900">User Profile</h3>
+              <p className="mt-1 max-w-2xl text-sm text-gray-500">Personal details and information.</p>
+            </div>
+            <div className="border-t border-gray-200">
+              <dl>
+                <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                  <dt className="text-sm font-medium text-gray-500">Full name</dt>
+                  <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{user?.fullName || 'John Doe'}</dd>
+                </div>
+                <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                  <dt className="text-sm font-medium text-gray-500">Email address</dt>
+                  <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{user?.email || 'john@example.com'}</dd>
+                </div>
+                <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                  <dt className="text-sm font-medium text-gray-500">Phone number</dt>
+                  <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{user?.phoneNumber || '(123) 456-7890'}</dd>
+                </div>
+                <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                  <dt className="text-sm font-medium text-gray-500">Account type</dt>
+                  <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{user?.isAdmin ? 'Administrator' : 'User'}</dd>
+                </div>
+              </dl>
+            </div>
+            <div className="px-4 py-3 bg-gray-50 text-right sm:px-6">
+              <button
+                type="button"
+                className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                Edit Profile
+              </button>
+            </div>
+          </div>
+        );
+      
+      case 'favorites':
+        return (
+          <div>
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Saved Properties</h3>
+            {isLoading ? (
+              <div className="animate-pulse flex space-x-4">
+                <div className="flex-1 space-y-6 py-1">
+                  <div className="h-60 bg-gray-200 rounded"></div>
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="h-2 bg-gray-200 rounded col-span-2"></div>
+                      <div className="h-2 bg-gray-200 rounded col-span-1"></div>
+                    </div>
+                    <div className="h-2 bg-gray-200 rounded"></div>
+                  </div>
+                </div>
+              </div>
+            ) : properties && properties.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {properties.slice(0, 3).map(property => (
+                  <div key={property.id} className="bg-white overflow-hidden shadow rounded-lg">
+                    <div className="h-48">
+                      <img
+                        className="w-full h-full object-cover"
+                        src={property.imageUrl || 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-1.2.1&auto=format&fit=crop&w=1470&q=80'}
+                        alt={property.name}
+                      />
+                    </div>
+                    <div className="p-4">
+                      <h4 className="text-lg font-semibold">{property.name}</h4>
+                      <p className="text-sm text-gray-600">{property.location}</p>
+                      <div className="mt-2 flex justify-between items-center">
+                        <span className="text-blue-600 font-bold">${property.rentAmount}/mo</span>
+                        <button 
+                          onClick={() => navigate(`/property/${property.id}`)}
+                          className="text-sm text-blue-600 hover:text-blue-800"
+                        >
+                          View Details
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-10">
+                <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
+                <h3 className="mt-2 text-sm font-medium text-gray-900">No saved properties</h3>
+                <p className="mt-1 text-sm text-gray-500">Get started by browsing properties and saving your favorites.</p>
+                <div className="mt-6">
+                  <button
+                    type="button"
+                    onClick={() => navigate('/')}
+                    className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                  >
+                    Browse Properties
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      
+      case 'messages':
+        return (
+          <div>
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Messages</h3>
+            <div className="bg-white shadow overflow-hidden sm:rounded-md">
+              <ul className="divide-y divide-gray-200">
+                {/* Sample messages */}
+                {[
+                  {
+                    id: 1,
+                    sender: 'Property Manager',
+                    message: 'Your application for the Downtown Apartment has been approved!',
+                    date: '3 days ago',
+                    read: false
+                  },
+                  {
+                    id: 2,
+                    sender: 'System',
+                    message: 'Welcome to RentIt! Complete your profile to get started.',
+                    date: '1 week ago',
+                    read: true
+                  },
+                  {
+                    id: 3,
+                    sender: 'Property Manager',
+                    message: 'Thank you for your interest in the Oceanview Condo.',
+                    date: '2 weeks ago',
+                    read: true
+                  }
+                ].map(message => (
+                  <li key={message.id}>
+                    <div className={`block hover:bg-gray-50 ${!message.read ? 'bg-blue-50' : ''}`}>
+                      <div className="px-4 py-4 sm:px-6">
+                        <div className="flex items-center justify-between">
+                          <p className={`text-sm font-medium ${!message.read ? 'text-blue-600' : 'text-gray-900'}`}>
+                            {message.sender}
+                          </p>
+                          <div className="ml-2 flex-shrink-0 flex">
+                            <p className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                              {message.date}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="mt-2 sm:flex sm:justify-between">
+                          <div className="sm:flex">
+                            <p className={`text-sm ${!message.read ? 'font-medium' : 'text-gray-500'}`}>
+                              {message.message}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        );
+      
+      case 'settings':
+        return (
+          <div>
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Account Settings</h3>
+            <div className="bg-white shadow overflow-hidden sm:rounded-lg">
+              <div className="px-4 py-5 sm:p-6">
+                <h4 className="text-md leading-6 font-medium text-gray-900">Change Password</h4>
+                <div className="mt-2 max-w-xl text-sm text-gray-500">
+                  <p>Update your password to maintain security.</p>
+                </div>
+                <form className="mt-5 sm:flex sm:items-center">
+                  <div className="w-full sm:max-w-xs">
+                    <label htmlFor="currentPassword" className="sr-only">Current Password</label>
+                    <input
+                      type="password"
+                      name="currentPassword"
+                      id="currentPassword"
+                      className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md mb-3"
+                      placeholder="Current Password"
+                    />
+                    <label htmlFor="newPassword" className="sr-only">New Password</label>
+                    <input
+                      type="password"
+                      name="newPassword"
+                      id="newPassword"
+                      className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md mb-3"
+                      placeholder="New Password"
+                    />
+                    <label htmlFor="confirmPassword" className="sr-only">Confirm New Password</label>
+                    <input
+                      type="password"
+                      name="confirmPassword"
+                      id="confirmPassword"
+                      className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                      placeholder="Confirm New Password"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    className="mt-3 w-full inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                  >
+                    Update
+                  </button>
+                </form>
+              </div>
+              <div className="px-4 py-5 sm:p-6 border-t border-gray-200">
+                <h4 className="text-md leading-6 font-medium text-gray-900">Notifications</h4>
+                <div className="mt-2 max-w-xl text-sm text-gray-500">
+                  <p>Receive updates about your account and properties.</p>
+                </div>
+                <div className="mt-5">
+                  <div className="flex items-start">
+                    <div className="flex items-center h-5">
+                      <input
+                        id="emailNotifications"
+                        name="emailNotifications"
+                        type="checkbox"
+                        className="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded"
+                        defaultChecked
+                      />
+                    </div>
+                    <div className="ml-3 text-sm">
+                      <label htmlFor="emailNotifications" className="font-medium text-gray-700">Email notifications</label>
+                      <p className="text-gray-500">Get notified when a property owner responds to your inquiry.</p>
+                    </div>
+                  </div>
+                  <div className="mt-4 flex items-start">
+                    <div className="flex items-center h-5">
+                      <input
+                        id="smsNotifications"
+                        name="smsNotifications"
+                        type="checkbox"
+                        className="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded"
+                      />
+                    </div>
+                    <div className="ml-3 text-sm">
+                      <label htmlFor="smsNotifications" className="font-medium text-gray-700">SMS notifications</label>
+                      <p className="text-gray-500">Receive text messages for important updates.</p>
+                    </div>
+                  </div>
+                  <div className="mt-5">
+                    <button
+                      type="button"
+                      className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    >
+                      Save preferences
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div className="px-4 py-5 sm:p-6 border-t border-gray-200">
+                <h4 className="text-md leading-6 font-medium text-gray-900 text-red-600">Delete Account</h4>
+                <div className="mt-2 max-w-xl text-sm text-gray-500">
+                  <p>Permanently remove your account and all of your data.</p>
+                </div>
+                <div className="mt-5">
+                  <button
+                    type="button"
+                    className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                  >
+                    Delete account
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <div className="flex flex-col md:flex-row">
+        {/* Sidebar */}
+        <div className="w-full md:w-1/4 mb-6 md:mb-0">
+          <div className="bg-white shadow overflow-hidden sm:rounded-lg p-6">
+            <div className="flex items-center mb-6">
+              <div className="h-16 w-16 rounded-full bg-blue-100 flex items-center justify-center text-blue-800 text-2xl font-bold">
+                {user?.fullName?.charAt(0) || 'U'}
+              </div>
+              <div className="ml-4">
+                <h2 className="text-xl font-semibold">{user?.fullName || 'User'}</h2>
+                <p className="text-gray-500">{user?.email || 'user@example.com'}</p>
+              </div>
+            </div>
+            
+            <nav className="mt-4 space-y-1">
+              <button
+                className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium ${
+                  activeTab === 'profile'
+                    ? 'bg-blue-100 text-blue-800'
+                    : 'text-gray-600 hover:bg-gray-50'
+                }`}
+                onClick={() => setActiveTab('profile')}
+              >
+                Profile
+              </button>
+              <button
+                className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium ${
+                  activeTab === 'favorites'
+                    ? 'bg-blue-100 text-blue-800'
+                    : 'text-gray-600 hover:bg-gray-50'
+                }`}
+                onClick={() => setActiveTab('favorites')}
+              >
+                Saved Properties
+              </button>
+              <button
+                className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium ${
+                  activeTab === 'messages'
+                    ? 'bg-blue-100 text-blue-800'
+                    : 'text-gray-600 hover:bg-gray-50'
+                }`}
+                onClick={() => setActiveTab('messages')}
+              >
+                Messages
+              </button>
+              <button
+                className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium ${
+                  activeTab === 'settings'
+                    ? 'bg-blue-100 text-blue-800'
+                    : 'text-gray-600 hover:bg-gray-50'
+                }`}
+                onClick={() => setActiveTab('settings')}
+              >
+                Settings
+              </button>
+              
+              <div className="pt-4 border-t border-gray-200 mt-4">
+                <button
+                  className="w-full text-left px-3 py-2 rounded-md text-sm font-medium text-red-600 hover:bg-red-50"
+                  onClick={handleLogout}
+                >
+                  Sign out
+                </button>
+              </div>
+            </nav>
+          </div>
+        </div>
+        
+        {/* Main Content */}
+        <div className="md:ml-6 w-full md:w-3/4">
+          <div className="bg-white shadow overflow-hidden sm:rounded-lg p-6">
+            {renderTabContent()}
+          </div>
+        </div>
+      </div>
+    </div>  );
+};
+
+export default UserDashboardPage;
+
