@@ -20,8 +20,8 @@ propertyRouter.post("/get-properties",async(req,res)=>{
         })
     }
 })
-propertyRouter.post("/get-property",async(req,res)=>{
-    const {propertyId}=req.body;
+propertyRouter.post("/get-property/:propertyId",async(req,res)=>{
+    const {propertyId}=req.params;
     try{
         const property = await propertyModel.findOne({_id:propertyId})
         if(!property)
