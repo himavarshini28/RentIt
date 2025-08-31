@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import PropertyCard from '../components/ui/PropertyCard';
+import { PROPERTY_ENDPOINTS } from '../utils/config';
 
 const Allproperties = () => {
   const [properties, setProperties] = useState([]);
@@ -9,9 +10,15 @@ const Allproperties = () => {
   useEffect(() => {
     const fetchProperties = async () => {
       try {
-        const response = await fetch('https://rent-it-zv5s.vercel.app/api/property/v1/get-properties');
+        const response = await fetch(PROPERTY_ENDPOINTS.ALL, {
+          method: 'POST', // The backend expects a POST request
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
         const data = await response.json();
-        setProperties(data);
+        console.log('API response:', data);
+        setProperties(data.properties || []); // Access the properties array from the response
       } catch (error) {
         console.error('Failed to fetch properties:', error);
       } finally {
@@ -52,6 +59,7 @@ const Allproperties = () => {
       </div>
     </section>
   );
+
 };
 
 export default Allproperties;

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import PropertyCard from './PropertyCard';
 import { Link } from 'react-router-dom';
+import { PROPERTY_ENDPOINTS } from '../../utils/config';
 
 const FeaturedProperties = () => {
   const [properties, setProperties] = useState([]);
@@ -9,9 +10,15 @@ const FeaturedProperties = () => {
   useEffect(() => {
     const fetchProperties = async () => {
       try {
-        const response = await fetch('https://rent-it-zv5s.vercel.app/api/property/v1/get-properties');
+        const response = await fetch(PROPERTY_ENDPOINTS.FEATURED, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
         const data = await response.json();
-        setProperties(data);
+        console.log('Featured properties response:', data);
+        setProperties(data.properties || []);
       } catch (error) {
         console.error('Failed to fetch properties:', error);
       } finally {

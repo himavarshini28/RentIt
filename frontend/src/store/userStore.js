@@ -36,8 +36,28 @@ const useUserStore = create((set) => ({
       // Save token to local storage
       localStorage.setItem('token', data.token);
       
-      // Set user in state
-      set({ user: data.user, isAuthenticated: true, isLoading: false, error: null });
+      // Set user in state - note: the signin endpoint might not return user data
+      // We'll set a placeholder and then fetch the full profile
+      set({ user: { email }, isAuthenticated: true, isLoading: false, error: null });
+      
+      // After login, fetch the user profile
+      try {
+        const profileResponse = await fetch(AUTH_ENDPOINTS.PROFILE, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${data.token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({})
+        });
+        
+        const profileData = await profileResponse.json();
+        if (profileResponse.ok && profileData.user) {
+          set({ user: profileData.user });
+        }
+      } catch (profileError) {
+        console.error("Could not fetch user profile after login:", profileError);
+      }
       return data;
     } catch (error) {
       set({ isLoading: false, error: error.message });
@@ -55,7 +75,7 @@ const useUserStore = create((set) => ({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(userData),
-        credentials: 'include',
+        // credentials: 'include' removed as it can cause CORS issues
       });
 
       const data = await response.json();
@@ -105,9 +125,12 @@ const useUserStore = create((set) => ({
       }      // API call to validate token and get user data
       console.log('Validating token using:', AUTH_ENDPOINTS.PROFILE);
       const response = await fetch(AUTH_ENDPOINTS.PROFILE, {
+        method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         },
+        body: JSON.stringify({}) // Empty body for POST request
       });
 
       const data = await response.json();

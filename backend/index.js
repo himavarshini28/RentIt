@@ -8,16 +8,35 @@ import propertyRouter from './routes/property.js';
 
 dotenv.config();
 const app=express();
-app.use(cors());
+
+// Configure CORS with specific options for debugging
+app.use(cors({
+  origin: '*', // Allow all origins for debugging
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+// Add CORS debugging middleware
+app.use((req, res, next) => {
+  console.log(`Request received: ${req.method} ${req.url}`);
+  next();
+});
+
 app.use(express.json());
+
+
+// Add a default route for testing
+app.get('/', (req, res) => {
+  res.send('Backend server is running!');
+});
 
 app.use('/api/admin/v1',adminRouter);
 app.use('/api/user/v1',userRouter);
 app.use('/api/property/v1',propertyRouter);
 
 
-app.listen(3000,()=>{
-    console.log("Server is running on port 3000");
+app.listen(5000,()=>{
+    console.log("Server is running on port 5000");
 });
 
 

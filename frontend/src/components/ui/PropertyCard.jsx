@@ -39,7 +39,7 @@ const PropertyCard = ({ property }) => {
         </div>
         <div className="mt-4">
           <Link
-            to={`/property/${property.id}`}
+            to={`/property/${property._id || property.id}`}
             className="inline-flex items-center px-3 py-2 text-sm font-medium text-cyan-600 hover:text-cyan-800"
           >
             View Details

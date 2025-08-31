@@ -1,7 +1,9 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import useUserStore from '../../store/userStore';
 
 const Hero = () => {
+  const { isAuthenticated, user } = useUserStore();
   return (
     <div className="relative bg-cyan-600">
       <div className="absolute inset-0">
@@ -17,13 +19,20 @@ const Hero = () => {
       </div>
 
       <div className="relative max-w-7xl mx-auto py-24 px-4 sm:py-32 sm:px-6 lg:px-8">
-        <h1 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl">
-          Find Your Perfect Rental
-        </h1>
+        {isAuthenticated && user ? (
+          <h1 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl">
+            Welcome back, {user.fullName?.split(' ')[0] || 'User'}
+          </h1>
+        ) : (
+          <h1 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl">
+            Find Your Perfect Rental
+          </h1>
+        )}
         <p className="mt-6 text-xl text-cyan-100 max-w-3xl">
-          RentIt makes it easy to discover your next home with thousands of
-          properties available for rent. Browse through our listings and find
-          the perfect place that suits your needs.
+          {isAuthenticated 
+            ? "Continue your search for the perfect property. We've got new listings waiting for you."
+            : "RentIt makes it easy to discover your next home with thousands of properties available for rent. Browse through our listings and find the perfect place that suits your needs."
+          }
         </p>
 
         <div className="mt-10">
@@ -89,10 +98,10 @@ const Hero = () => {
 
               <div className="flex items-end">
                 <Link
-                  to="/properties"
+                  to="/property"
                   className="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-cyan-600 hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500"
                 >
-                  Search Properties
+                  {isAuthenticated ? 'Find Your Next Home' : 'Search Properties'}
                 </Link>
               </div>
             </div>

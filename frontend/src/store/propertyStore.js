@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { PROPERTY_ENDPOINTS } from '../utils/config';
 
 const usePropertyStore = create((set, get) => ({
   // Properties state
@@ -32,26 +33,27 @@ const usePropertyStore = create((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       // API call to get properties
-      const response = await fetch('https://rent-it-zv5s.vercel.app/api/property/v1/get-properties', {
-        method: 'GET',
+      const response = await fetch(PROPERTY_ENDPOINTS.ALL, {
+        method: 'POST', // Changed to POST to match backend
         headers: {
           'Content-Type': 'application/json',
         },
       });
 
       const data = await response.json();
+      console.log('Property store fetch response:', data);
       
       if (!response.ok) {
         throw new Error(data.message || 'Failed to fetch properties');
       }
 
       set({ 
-        properties: data, 
-        filteredProperties: data, 
+        properties: data.properties || [], // Access the properties array
+        filteredProperties: data.properties || [], 
         isLoading: false, 
         error: null 
       });
-      return data;
+      return data.properties || [];
     } catch (error) {
       set({ isLoading: false, error: error.message });
       throw error;
@@ -62,21 +64,22 @@ const usePropertyStore = create((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       // API call to get property by ID
-      const response = await fetch(`https://rent-it-zv5s.vercel.app/api/property/v1/${id}`, {
-        method: 'GET',
+      const response = await fetch(PROPERTY_ENDPOINTS.DETAIL(id), {
+        method: 'POST', // Changed to POST to match backend
         headers: {
           'Content-Type': 'application/json',
         },
       });
 
       const data = await response.json();
+      console.log('Property detail fetch response:', data);
       
       if (!response.ok) {
         throw new Error(data.message || 'Failed to fetch property');
       }
 
-      set({ currentProperty: data, isLoading: false, error: null });
-      return data;
+      set({ currentProperty: data.property || {}, isLoading: false, error: null });
+      return data.property || {};
     } catch (error) {
       set({ isLoading: false, error: error.message });
       throw error;
